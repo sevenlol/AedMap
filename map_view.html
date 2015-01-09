@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCXVaGdYMkavpAdFN7-j_65bAMRpmmdoYw"></script>
+		<style>
+      		html, body, #googleMap {
+        		height: 100%;
+        		margin: 0px;
+        		padding: 0px;
+      		}
+    </style>
+    	<!-- javascript code for AED object -->
+    	<script type="text/javascript" src="aed_obj.js"></script>
+    	<!-- test code for AED object -->
+    	<script type="text/javascript" src="aedarr_test.js"></script>
+    	<!-- test code for Marker and InfoWindow object -->
+    	<script type="text/javascript" src="infowindowarr_test.js"></script>
+		<script>
+			var map;
+			var currentCoord = new Coord(-1,-1);
+			var aedArr = [];
+			var markerArr = [];
+			var infoWindowArr = [];
+			var etaArr = [];
+			var etaIconArr = [];
+
+			function initialize() {
+				/**
+				 *  Google map initialization.
+				 */
+  				var mapProp = {
+    				center:new google.maps.LatLng(25.0911,121.5598),
+    				zoom:14,
+    				mapTypeId:google.maps.MapTypeId.ROADMAP
+  				};
+  				map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+
+  				/**
+  				 *  test code that display three markers
+  				 *  click on each marker pops up a infowindow
+  				 */
+
+  				markerArr = createMarkerTestArr(3);
+  				infoWindowArr = createInfoWindowTestArr(3);
+  				setInfoWindowListener();
+  				setMarkers(map);
+
+
+  				/**
+  				 * real code
+  				 */
+
+  				//placeholder for a function that updates currentCoord
+
+  				//loadData(currentCoord);
+
+  				//updateInfoWindows();
+
+  				//updateMarkers();
+
+  				//updateETAIcons(currentCoord);
+
+			}
+			google.maps.event.addDomListener(window, 'load', initialize);
+
+
+			function loadData(coord){
+				/** load AED data from files and modify aedArr
+				 *
+				 *  @param  coord  an Coord object that represents the current
+				 *                 location
+				 *  @modify aedArr
+				 */
+			}
+
+			function createInfoWindow(aed){
+				/** create an InfoWindow object (google map API) that display
+				 *      the detail information of the AED object (input)
+				 *
+				 *  @param  aed  an AED object (see aed_obj.js)
+				 *  @return      the created InfoWindow object
+				 */
+
+			}
+
+			function updateInfoWindows(){
+				/** create new InfoWindow objects and update infoWindowArr
+				 *      based on the current aedArr
+				 *
+				 *  @param
+				 *  @return
+				 *  @modify  infoWindowArr
+				 */
+				 // set infoWindowArr to empty (not null)
+				 infoWindowArr = [];
+				 for (var i=0;i<aedArr.length;i++){
+				 	infoWindowArr.push(createInfoWindow(aedArr[i]));
+				 }
+			}
+
+			function createMarker(aed, infoWindow){
+				/** create a marker that represents the AED object (input) and
+				 *      contains the infoWindow (input)
+				 *
+				 *  @param  aed        an AED object that is used to create
+				 *                     the marker
+				 *  @param  infoWindow an InfoWindow object (google map API)
+				 *                     that is going to popup when the marker
+				 *                     is clicked
+				 *  @return            generated marker
+				 */
+			}
+
+			function updateMarkers(){
+				/** create new markers and update markerArr based on the
+				 *      current aedArr and infoWindowArr
+				 *
+				 *  @param
+				 *  @return
+				 *  @modify  markerArr
+				 */
+				//clear markerArr
+				deleteMarkers();
+				for (var i=0;i<aedArr.length;i++){
+					markerArr.push(createMarker(aedArr[i], infoWindowArr[i]));
+				}
+				setInfoWindowListener();
+				//pin markers to the map
+				setMarkers(map);
+			}
+
+			function setInfoWindowListener(){
+				for (var i=0;i<markerArr.length;i++){
+  					var marker = markerArr[i];
+  					var infoWindow = infoWindowArr[i];
+					google.maps.event.addListener(marker, 'click', function(marker, infoWindow){
+  						return function(){
+  								infoWindow.open(map, marker);
+  						}
+  					}(marker, infoWindow));
+				}
+			}
+
+			function deleteMarkers(){
+				/** remove all markers from the map and set markerArr to empty
+				 *      (not null)
+				 *
+				 *  @param
+				 *  @return
+				 *  @modify  markerArr
+				 */
+				setMarkers(null);
+				markerArr = [];
+			}
+
+			function setMarkers(map){
+				/** pin all markers to the map
+				 *
+				 *  @param
+				 *  @return
+				 *  @modify  markerArr
+				 */
+				for (var i=0;i<markerArr.length;i++){
+					markerArr[i].setMap(map);
+				}
+			}
+
+			function calculateETA(coord1, coord2, travelMode){
+				/** calculate the estimated time of arrival from coord1
+				 *      to coord2 using travelMode (e.g., walking)
+				 *
+				 *  @param  coord1     Coord object of the starting point
+				 *  @param  coord2     Coord object of the destination
+				 *  @param  travelMode 'walking' or 'driving'
+				 *  @return            the estimated time of arrival (sec)
+				 *                     return -1 if fail
+				 */
+
+				//request url
+				var url = "";
+
+				var jsonStr = performHttpRequest(url, getDurationFromJsonStr);
+			}
+
+			function performHttpRequest(url, index, callback){
+				//http request object
+				var httpRequest;
+
+				//create xmlhttprequest object
+				if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+            		httpRequest = new XMLHttpRequest();
+            		if (httpRequest.overrideMimeType) {
+                		httpRequest.overrideMimeType('text/xml');
+            		}
+        		}
+        		else if (window.ActiveXObject) { // IE
+            		try {
+                		httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+            		}
+            		catch (e) {
+                		try {
+                    		httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                		}
+                		catch (e) {}
+            		}
+        		}
+
+        		if (!httpRequest) {
+        			alert('Giving up :( Cannot create an XMLHTTP instance');
+        			return null;
+        		}
+
+        		//set response listener
+        		httpRequest.onreadystatechange = (function(index, callback){
+        			if (httpRequest.readyState == 4) {
+            			if (httpRequest.status == 200) {
+            				//parse JSON response
+            				alert(httpRequest.responseText);
+                			callback(httpRequest.responseText, index);
+            			} else {
+                			alert('There was a problem with the request.');
+                			return null;
+            			}
+        			}
+        		})(index, callback);
+
+				//send request
+        		httpRequest.open('GET', url, true);
+        		httpRequest.send('');
+			}
+
+			var httpCallBack = function(jsonStr, index){
+
+			}
+
+			function getDurationFromJsonStr(jsonStr){
+				/** parse JSON response from google directions API and
+				 *      retrieve 'duration' value that represents the
+				 *      estimated time of arrival
+				 *
+				 *  @param  jsonStr  JSON string from google directions
+				 *                   API
+				 *  @return          total estimated time of arrival
+				 */
+			}
+
+			function createETAIcon(eta){
+				/** create an eta icon that display the estimated time
+				 *      of arrival
+				 *
+				 *  @param  eta  the estimated time of arrival (input)
+				 *  @return      the created eta icon
+				 *
+				 *  note: not sure which google map object should be
+				 *        used. need survey.
+				 */
+			}
+
+			function updateETAIcons(coord){
+				/** create new eta icons and update etaArr and
+				 *      etaIconArr
+				 *
+				 *  @param  coord  the Coord object representing the
+				 *                 current location
+				 *  @return
+				 *  @modify etaArr,etaIconArr
+				 *
+				 *  note: might need helper functions like setMarkers,
+				 *        depending on which object is used for ETAIcon
+				 */
+			}
+
+			function setETAIcon(index){
+
+			}
+
+
+		</script>
+	</head>
+
+	<body>
+		<div id="googleMap"></div>
+	</body>
+</html>
