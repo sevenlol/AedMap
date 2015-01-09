@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCXVaGdYMkavpAdFN7-j_65bAMRpmmdoYw"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 		<style>
       		html, body, #googleMap {
         		height: 100%;
@@ -23,6 +24,12 @@
 			var infoWindowArr = [];
 			var etaArr = [];
 			var etaIconArr = [];
+			var directionsService = new google.maps.DirectionsService();
+
+			var httpCallBack = function(jsonStr, index){
+				alert("index: " + index);
+				alert("jsonStr: " + jsonStr);
+			};
 
 			function initialize() {
 				/**
@@ -41,12 +48,13 @@
   				 *  click on each marker pops up a infowindow
   				 */
 
+  				makeDirectionsRequest(null, null, 3, null);
+
+  				aedArr = testAedArr;
   				markerArr = createMarkerTestArr(3);
   				infoWindowArr = createInfoWindowTestArr(3);
   				setInfoWindowListener();
   				setMarkers(map);
-
-
   				/**
   				 * real code
   				 */
@@ -166,82 +174,72 @@
 				}
 			}
 
-			function calculateETA(coord1, coord2, travelMode){
-				/** calculate the estimated time of arrival from coord1
-				 *      to coord2 using travelMode (e.g., walking)
+			function calculateETAAndUpdateArr(travelMode){
+				/** 1. iterates through etaArr and calculate the ETAs
+				 *  2. update etaArr
+				 *  3. create etaIcon and update etaIconArr
 				 *
-				 *  @param  coord1     Coord object of the starting point
-				 *  @param  coord2     Coord object of the destination
 				 *  @param  travelMode 'walking' or 'driving'
-				 *  @return            the estimated time of arrival (sec)
-				 *                     return -1 if fail
+				 *  @return
+				 *                     
 				 */
 
-				//request url
-				var url = "";
+				//clear etaIconArr
+				deleteEtaIcons();
+				etaArr = [];
 
-				var jsonStr = performHttpRequest(url, getDurationFromJsonStr);
+				//calculate eta and update arrays
+				for (var i = 0; i < aedArr.length; i++) {
+					makeDirectionsRequest(currentCoord, aedArr[i], i, travelMode);
+				}
 			}
 
-			function performHttpRequest(url, index, callback){
-				//http request object
-				var httpRequest;
-
-				//create xmlhttprequest object
-				if (window.XMLHttpRequest) { // Mozilla, Safari, ...
-            		httpRequest = new XMLHttpRequest();
-            		if (httpRequest.overrideMimeType) {
-                		httpRequest.overrideMimeType('text/xml');
-            		}
-        		}
-        		else if (window.ActiveXObject) { // IE
-            		try {
-                		httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-            		}
-            		catch (e) {
-                		try {
-                    		httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-                		}
-                		catch (e) {}
-            		}
-        		}
-
-        		if (!httpRequest) {
-        			alert('Giving up :( Cannot create an XMLHTTP instance');
-        			return null;
-        		}
-
-        		//set response listener
-        		httpRequest.onreadystatechange = (function(index, callback){
-        			if (httpRequest.readyState == 4) {
-            			if (httpRequest.status == 200) {
-            				//parse JSON response
-            				alert(httpRequest.responseText);
-                			callback(httpRequest.responseText, index);
-            			} else {
-                			alert('There was a problem with the request.');
-                			return null;
-            			}
-        			}
-        		})(index, callback);
-
-				//send request
-        		httpRequest.open('GET', url, true);
-        		httpRequest.send('');
-			}
-
-			var httpCallBack = function(jsonStr, index){
-
-			}
-
-			function getDurationFromJsonStr(jsonStr){
-				/** parse JSON response from google directions API and
-				 *      retrieve 'duration' value that represents the
-				 *      estimated time of arrival
+			function makeDirectionsRequest(coord, aed, index, travelMode) {
+				/** 1. make directionService request using google map API
+				 *  2. retrieve duration value (in sec) in the DirectionsResult
+				 *         object and calculate the total duration
+				 *  3. update etaArr
+				 *  4. create etaIcon and update etaIconArr
+				 *	
+ 				 *  @param  coord       coord of current location
+ 				 *  @param  aed         aed object to calculate the ETA
+ 				 *  @param  index       the index of {@paramref aed} in aedArr
+ 				 * 	@param  travelMode  'walking' or 'driving'
 				 *
-				 *  @param  jsonStr  JSON string from google directions
-				 *                   API
-				 *  @return          total estimated time of arrival
+				 */
+
+  				var request = {
+    				origin: 'Sydney, NSW',
+    				destination: 'Sydney, NSW',
+    				waypoints:[{location: 'Bourke, NSW'}, {location: 'Broken Hill, NSW'}],
+    				travelMode: google.maps.TravelMode.DRIVING
+  				};
+
+  				directionsService.route(request, function(response, status) {
+    				if (status == google.maps.DirectionsStatus.OK) {
+    					alert(index);
+      					var eta = getDurationFromResultObj(response);
+      					var etaIcon = createETAIcon(eta);
+      					etaArr[index] = eta;
+      					etaArr[index] = etaIcon;
+      					setETAIcon(index);
+    				}
+  				});
+			}
+
+			function getDurationFromResultObj(resultObj){
+				/** parse google.maps.DirectionsResult from google 
+				 *      directions API and retrieve 'duration' values 
+				 *      that represents the estimated time of arrival
+				 *      and calcualte the summation of the values.
+				 *
+				 *  @param  resultObj DirectionsResult object from 
+				 *                    google directions API
+				 *  @return           total estimated time of arrival
+				 *
+				 *  note: resultObj is assumed to have only 1 route
+				 *        if not, the sum of the first route's duration
+				 *        is returned. 
 				 */
 			}
 
@@ -257,21 +255,9 @@
 				 */
 			}
 
-			function updateETAIcons(coord){
-				/** create new eta icons and update etaArr and
-				 *      etaIconArr
-				 *
-				 *  @param  coord  the Coord object representing the
-				 *                 current location
-				 *  @return
-				 *  @modify etaArr,etaIconArr
-				 *
-				 *  note: might need helper functions like setMarkers,
-				 *        depending on which object is used for ETAIcon
-				 */
-			}
-
 			function setETAIcon(index){
+				//helper method (maybe needed).
+				//set etaIcon[index] on the map
 
 			}
 
