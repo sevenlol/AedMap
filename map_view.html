@@ -16,9 +16,11 @@
     	<script type="text/javascript" src="aedarr_test.js"></script>
     	<!-- test code for Marker and InfoWindow object -->
     	<script type="text/javascript" src="infowindowarr_test.js"></script>
+    	<!-- infobox object to display eta -->
+    	<script type="text/javascript" src="infobox_packed.js"></script>
 		<script>
 			var map;
-			var currentCoord = new Coord(-1,-1);
+			var currentCoord = new Coord(25.0911,121.5598);
 			var aedArr = [];
 			var markerArr = [];
 			var infoWindowArr = [];
@@ -47,10 +49,11 @@
   				 *  test code that display three markers
   				 *  click on each marker pops up a infowindow
   				 */
-
-  				makeDirectionsRequest(null, null, 3, null);
-
   				aedArr = testAedArr;
+  				//makeDirectionsRequest(currentCoord, aedArr[2], 2, "walking");
+  				calculateEtaAndUpdateArr("walking");
+
+  				
   				markerArr = createMarkerTestArr(3);
   				infoWindowArr = createInfoWindowTestArr(3);
   				setInfoWindowListener();
@@ -138,19 +141,19 @@
 				setMarkers(map);
 			}
 
-			function setInfoWindowListener(){
-				for (var i=0;i<markerArr.length;i++){
+			function setInfoWindowListener() {
+				for (var i=0;i<markerArr.length;i++) {
   					var marker = markerArr[i];
   					var infoWindow = infoWindowArr[i];
-					google.maps.event.addListener(marker, 'click', function(marker, infoWindow){
-  						return function(){
+					google.maps.event.addListener(marker, 'click', function(marker, infoWindow) {
+  						return function() {
   								infoWindow.open(map, marker);
   						}
   					}(marker, infoWindow));
 				}
 			}
 
-			function deleteMarkers(){
+			function deleteMarkers() {
 				/** remove all markers from the map and set markerArr to empty
 				 *      (not null)
 				 *
@@ -162,19 +165,19 @@
 				markerArr = [];
 			}
 
-			function setMarkers(map){
+			function setMarkers(map) {
 				/** pin all markers to the map
 				 *
 				 *  @param
 				 *  @return
 				 *  @modify  markerArr
 				 */
-				for (var i=0;i<markerArr.length;i++){
+				for (var i=0;i<markerArr.length;i++) {
 					markerArr[i].setMap(map);
 				}
 			}
 
-			function calculateETAAndUpdateArr(travelMode){
+			function calculateEtaAndUpdateArr(travelMode) {
 				/** 1. iterates through etaArr and calculate the ETAs
 				 *  2. update etaArr
 				 *  3. create etaIcon and update etaIconArr
@@ -194,6 +197,20 @@
 				}
 			}
 
+			function deleteEtaIcons() {
+				/** remove all etaIcons from the map and set etaIconArr to empty
+				 *
+				 *  @param
+				 *  @return
+				 *  @modify  etaIconArr
+				 */
+				for (var i = 0; i < etaIconArr.length; i++) {
+					if (etaIconArr[i] != undefined)
+						etaIconArr[i].close();
+				}
+				etaIconArr = [];
+			}
+
 			function makeDirectionsRequest(coord, aed, index, travelMode) {
 				/** 1. make directionService request using google map API
 				 *  2. retrieve duration value (in sec) in the DirectionsResult
@@ -208,21 +225,27 @@
 				 *
 				 */
 
-  				var request = {
-    				origin: 'Sydney, NSW',
-    				destination: 'Sydney, NSW',
-    				waypoints:[{location: 'Bourke, NSW'}, {location: 'Broken Hill, NSW'}],
-    				travelMode: google.maps.TravelMode.DRIVING
-  				};
+				var originLatLng = new google.maps.LatLng(coord.lat, coord.lng);
+				var destinationLatLng = new google.maps.LatLng(aed.coord.lat, aed.coord.lng);
 
+				var request = {};
+				//set parameters of the request
+				request['origin']      = originLatLng;
+				request['destination'] = destinationLatLng;
+				if (travelMode === "driving")
+					request['travelMode'] = google.maps.TravelMode.DRIVING;
+				else if (travelMode === "walking")
+					request['travelMode'] = google.maps.TravelMode.WALKING;
+
+				//make request
   				directionsService.route(request, function(response, status) {
     				if (status == google.maps.DirectionsStatus.OK) {
-    					alert(index);
+    					//alert(response.routes[0].legs[0].duration.value);
       					var eta = getDurationFromResultObj(response);
-      					var etaIcon = createETAIcon(eta);
+      					//alert("Total duration: " + eta);
+      					var etaIcon = createETAIcon(aed.coord, eta, travelMode);
       					etaArr[index] = eta;
-      					etaArr[index] = etaIcon;
-      					setETAIcon(index);
+      					etaIconArr[index] = etaIcon;
     				}
   				});
 			}
@@ -236,32 +259,79 @@
 				 *  @param  resultObj DirectionsResult object from 
 				 *                    google directions API
 				 *  @return           total estimated time of arrival
+				 *                    (in sec)
 				 *
 				 *  note: resultObj is assumed to have only 1 route
 				 *        if not, the sum of the first route's duration
 				 *        is returned. 
 				 */
+
+				var totalDuration = 0;
+				var resultRoute = resultObj.routes[0];
+				for (var i = 0; i < resultRoute.legs.length; i++) {
+					totalDuration += resultRoute.legs[i].duration.value;
+				}
+				return totalDuration;
 			}
 
-			function createETAIcon(eta){
+			function createETAIcon(coord, eta, travelMode){
 				/** create an eta icon that display the estimated time
 				 *      of arrival
 				 *
-				 *  @param  eta  the estimated time of arrival (input)
-				 *  @return      the created eta icon
+				 *  @param  coord       the coordination of the center 
+				 *                      of etaIcon
+				 *  @param  eta         the estimated time of arrival
+				 *  @param  travelMode  walking or driving
+				 *  @return             the created etaIcon
 				 *
-				 *  note: not sure which google map object should be
-				 *        used. need survey.
+				 *  note: InfoBox from google.maps.utility.library
 				 */
+
+				var labelText = travelMode === "walking" ? "Mode: Walking\n" : "Mode: Driving\n";
+				labelText += "ETA: " + secToTimeStr(eta) + "\n";
+				var centerLoc = new google.maps.LatLng(coord.lat, coord.lng);
+
+				var myOptions = {
+			 		content: labelText,
+					boxStyle: {
+			   			border: "1px solid black",
+			  			textAlign: "center",
+			  			fontSize: "8pt",
+			  			width: "100px"
+			 		},
+					disableAutoPan: true,
+					pixelOffset: new google.maps.Size(-50, 0),
+					position: centerLoc,
+					closeBoxURL: "",
+					isHidden: false,
+					pane: "mapPane",
+					enableEventPropagation: true
+				};
+
+				var ibLabel = new InfoBox(myOptions);
+				ibLabel.open(map);
+				return ibLabel;
 			}
 
-			function setETAIcon(index){
-				//helper method (maybe needed).
-				//set etaIcon[index] on the map
+			function secToTimeStr(sec){
+				/** helper function, turn seconds into hh:mm:ss string
+				 *  
+				 *  @param  sec  integer representing second (e.g., 53
+				 *               means 53 seconds)
+				 *  @return      time string (in hh:mm:ss format)
+				 */
 
+				var sec_num = sec;
+    			var hours   = Math.floor(sec_num / 3600);
+    			var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    			var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    			if (hours   < 10) {hours   = "0"+hours;}
+    			if (minutes < 10) {minutes = "0"+minutes;}
+   				if (seconds < 10) {seconds = "0"+seconds;}
+    			var time    = hours+':'+minutes+':'+seconds;
+    			return time;
 			}
-
-
 		</script>
 	</head>
 
