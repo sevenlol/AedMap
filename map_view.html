@@ -9,7 +9,7 @@
         		margin: 0px;
         		padding: 0px;
       		}
-    </style>
+    	</style>
     	<!-- javascript code for AED object -->
     	<script type="text/javascript" src="aed_obj.js"></script>
     	<!-- test code for AED object -->
@@ -288,24 +288,23 @@
 				 */
 
 				var boxText = document.createElement("div");
-				boxText.style.cssText = "font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;";
-				var labelText = travelMode === "walking" ? "Mode: Walking<br>" : "Mode: Driving<br>";
-				labelText += "ETA: " + secToTimeStr(eta);
+				boxText.style.cssText = "font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;background-color:#9B4A4A;-webkit-border-radius: 8px;height:25px;padding-top:2px;padding-right:5px;";
+				//var labelText = travelMode === "walking" ? "Mode: Walking<br>" : "Mode: Driving<br>";
+				var labelText = "";
+				labelText += "<img src=\"icon/walking-white.svg\" style=\"height:18px;margin-left:10px;margin-top:2px;float:left;\">" + secToTimeStr(eta);
 				boxText.innerHTML = labelText;
 				var centerLoc = new google.maps.LatLng(coord.lat, coord.lng);
 
 				var myOptions = {
 			 		content: boxText,
 					boxStyle: {
-			   			border: "1px solid #111111",
-			   			background: "#252525",
 			  			textAlign: "center",
 			  			color: "#F5F5F5",
-			  			fontSize: "8pt",
-			  			width: "120px"
+			  			fontSize: "11pt",
+			  			width: "90px"
 			 		},
 					disableAutoPan: true,
-					pixelOffset: new google.maps.Size(-60, 0),
+					pixelOffset: new google.maps.Size(-45, 0),
 					position: centerLoc,
 					closeBoxURL: "",
 					isHidden: false,
@@ -334,7 +333,7 @@
     			if (hours   < 10) {hours   = "0"+hours;}
     			if (minutes < 10) {minutes = "0"+minutes;}
    				if (seconds < 10) {seconds = "0"+seconds;}
-    			var time    = hours+'h'+minutes+'m'+seconds + 's';
+    			var time    = hours+'h'+minutes+'m';
     			return time;
 			}
 		</script>
