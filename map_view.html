@@ -287,20 +287,25 @@
 				 *  note: InfoBox from google.maps.utility.library
 				 */
 
-				var labelText = travelMode === "walking" ? "Mode: Walking\n" : "Mode: Driving\n";
-				labelText += "ETA: " + secToTimeStr(eta) + "\n";
+				var boxText = document.createElement("div");
+				boxText.style.cssText = "font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;";
+				var labelText = travelMode === "walking" ? "Mode: Walking<br>" : "Mode: Driving<br>";
+				labelText += "ETA: " + secToTimeStr(eta);
+				boxText.innerHTML = labelText;
 				var centerLoc = new google.maps.LatLng(coord.lat, coord.lng);
 
 				var myOptions = {
-			 		content: labelText,
+			 		content: boxText,
 					boxStyle: {
-			   			border: "1px solid black",
+			   			border: "1px solid #111111",
+			   			background: "#252525",
 			  			textAlign: "center",
+			  			color: "#F5F5F5",
 			  			fontSize: "8pt",
-			  			width: "100px"
+			  			width: "120px"
 			 		},
 					disableAutoPan: true,
-					pixelOffset: new google.maps.Size(-50, 0),
+					pixelOffset: new google.maps.Size(-60, 0),
 					position: centerLoc,
 					closeBoxURL: "",
 					isHidden: false,
@@ -329,7 +334,7 @@
     			if (hours   < 10) {hours   = "0"+hours;}
     			if (minutes < 10) {minutes = "0"+minutes;}
    				if (seconds < 10) {seconds = "0"+seconds;}
-    			var time    = hours+':'+minutes+':'+seconds;
+    			var time    = hours+'h'+minutes+'m'+seconds + 's';
     			return time;
 			}
 		</script>
