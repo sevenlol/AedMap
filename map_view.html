@@ -192,7 +192,13 @@
 
 				//calculate eta and update arrays
 				for (var i = 0; i < aedArr.length; i++) {
-					makeDirectionsRequest(currentCoord, aedArr[i], i, travelMode);
+					setTimeout((function(coord, aed, index, mode) {
+						return function(){
+							makeDirectionsRequest(coord, aed, index, mode);
+							if (index == aedArr.length - 1)
+								alert("done");
+						}
+					})(currentCoord, aedArr[i], i, travelMode), Math.floor(i/10) * 12000);
 				}
 			}
 
