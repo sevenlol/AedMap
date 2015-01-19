@@ -1,6 +1,6 @@
 var gridInfo;
 //var aedArr = [];
-
+//Test Git
 var GridInfo = function(lat_start, lat_end, lat_unit, lng_start, lng_end, lng_unit) {
 	this.lat_start = lat_start;
 	this.lat_end = lat_end;
