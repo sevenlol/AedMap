@@ -1,6 +1,6 @@
 var gridInfo;
 //var aedArr = [];
-//Test Git
+
 var GridInfo = function(lat_start, lat_end, lat_unit, lng_start, lng_end, lng_unit) {
 	this.lat_start = lat_start;
 	this.lat_end = lat_end;
@@ -19,14 +19,15 @@ function tempLoadData(coord) {
 	gridInfo = new GridInfo(gridObj.lat_grid_start, gridObj.lat_grid_end, gridObj.lat_grid_unit, gridObj.lng_grid_start, gridObj.lng_grid_end, gridObj.lng_grid_unit);
 	var gridArr = findAllGrid(coord);
 	var tempAEDArr;
-	//console.log("GridArr");
-	//console.log(gridArr[0]);
-	//console.log(gridArr[1]);
-	//console.log(gridArr[2]);
-	//console.log(gridArr[3]);
+	console.log("GridArr");
+	console.log(gridArr[0]);
+	console.log(gridArr[1]);
+	console.log(gridArr[2]);
+	console.log(gridArr[3]);
 	//alert("GridArr L: " + gridArr.length);
 	var idArr = fetchIDfromGrid(gridArr);
-	//console.log(idArr);
+	console.log("ID Array: ");
+	console.log(idArr);
 	//alert("IdArr L: " + idArr.length);
 	tempAEDArr = aedData(idArr);
 	//console.log(tempAEDArr[0]);
@@ -76,7 +77,7 @@ function findAllGrid(coord) {
 	// [3] => north grid
 	var distThreshold = tempAED.NEIGHBOR_DIST_THRESHOLD;
 	var tempCoord = new Coord(coord.lat, coord.lng);
-	tempCoord = calcGridStart(tempCoord);
+	//tempCoord = calcGridStart(tempCoord);
 	//console.log(tempCoord);
 	gridAnsArr.push(calcGridStart(dist2Coord(tempCoord, "west", distThreshold)));
 	gridAnsArr.push(calcGridStart(dist2Coord(tempCoord, "east", distThreshold)));
@@ -101,7 +102,7 @@ function findAllGrid(coord) {
 }
 
 function checkEqual(first, second) {
-	var thresh = 0.00001;
+	var thresh = 0.000001;
 	if(Math.abs(first - second) < thresh)
 		return true;
 	else
