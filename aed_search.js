@@ -29,8 +29,9 @@ function tempLoadData(coord) {
 	console.log("ID Array: ");
 	console.log(idArr);
 	//alert("IdArr L: " + idArr.length);
-	tempAEDArr = aedData(idArr);
+	tempAEDArr = aedData(idArr, coord);
 	//console.log(tempAEDArr[0]);
+	tempAEDArr.sort(sortDist);
 	return tempAEDArr;
 }
 
@@ -172,7 +173,7 @@ function padZeros(num) {
 	return String("00000" + n).slice(-5); // returns 00123 
 }
 
-function aedData(idArr) {
+function aedData(idArr, coord) {
 	var tempAEDInfoStr;
 	var tempAEDJSON;
 	var tempAEDArr = [];
@@ -182,6 +183,7 @@ function aedData(idArr) {
 		//console.log("AED_Info" + tempAEDInfoStr);
 		tempAEDJSON = str2JSON(tempAEDInfoStr);
 		tempAEDArr.push(new AED(tempAEDJSON.id, tempAEDJSON.loc, new Coord(tempAEDJSON.lat, tempAEDJSON.lng), tempAEDJSON.addr, tempAEDJSON.img_url));
+		tempAEDArr[tempAEDArr.length - 1].dist2cur = dist(coord, new Coord(tempAEDJSON.lat, tempAEDJSON.lng));
 	}
 	return tempAEDArr;
 }
@@ -214,4 +216,13 @@ function dist2Coord(coord, dir, distant) {
 	}
 	//console.log(resultCoord);
 	return resultCoord;
+}
+
+function sortDist(a, b) {
+	if(a.dist2cur < b.dist2cur)
+		return -1;
+	else if(a.dist2cur > b.dist2cur)
+		return 1;
+	else
+		return 0;
 }
