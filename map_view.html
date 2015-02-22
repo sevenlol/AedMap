@@ -23,6 +23,8 @@
     	<script type="text/javascript" src="aed_search.js"></script>
 		<script type="text/javascript" src="aed_data/aed_data.js"></script>
 		<script type="text/javascript" src="aed_data/aed_database.js"></script>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap-theme.min.css" rel="stylesheet">
 		<script>
 			var map;
 			var currentCoord = new Coord(24.94975,121.35262);
@@ -293,9 +295,11 @@
 				 */
 
 				var boxText = document.createElement("div");
-				boxText.style.cssText = "font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;background-color:#9B4A4A;-webkit-border-radius: 8px;height:25px;padding:0px;margin:0px;";
-				var labelText = "<div style=\"margin:auto;\">";
-				labelText += "<img src=\"icon/walking-white.svg\" style=\"height:16px;width:12px;margin-left:8px;margin-top:3px;float:left;\"><p style=\"margin: auto;padding-top:2px;\">" + secToTimeStr(eta) + "</p></div>";
+				// boxText.style.cssText = "font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;background-color:#9B4A4A;-webkit-border-radius: 8px;height:25px;padding:0px;margin:0px;";
+				// var labelText = "<div style=\"margin:auto;\">";
+				// labelText += "<img src=\"icon/walking-white.svg\" style=\"height:16px;width:12px;margin-left:8px;margin-top:3px;float:left;\"><p style=\"margin: auto;padding-top:2px;\">" + secToTimeStr(eta) + "</p></div>";
+				var labelText = "<span class=\"label label-primary\">";
+				labelText += secToTimeStr(eta) + "</span>";
 				boxText.innerHTML = labelText;
 				var centerLoc = new google.maps.LatLng(coord.lat, coord.lng);
 
