@@ -66,7 +66,7 @@
 
   				loadData(currentCoord);
 
-  				// updateInfoWindows();
+  				updateInfoWindows();
 
   				updateMarkers();
 
@@ -94,6 +94,11 @@
 				 *  @return      the created InfoWindow object
 				 */
 
+				var contentStr = "<h3>Loc: " + aed.location + "</h1>";
+				var infoWindow = new google.maps.InfoWindow({
+					content: contentStr
+				});
+				return infoWindow;
 			}
 
 			function updateInfoWindows(){
