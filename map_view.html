@@ -94,7 +94,10 @@
 				 *  @return      the created InfoWindow object
 				 */
 
-				var contentStr = "<h3>Loc: " + aed.location + "</h1>";
+				var contentStr = "<h4>位置： " + aed.location + "</h4>";
+
+				contentStr += "<h4>地址： " + aed.addr + "</h4>";
+
 				var infoWindow = new google.maps.InfoWindow({
 					content: contentStr
 				});
